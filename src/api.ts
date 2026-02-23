@@ -96,9 +96,11 @@ export const api = {
       p1_name: p1.name,
       p1_role: p1.role,
       p1_email: p1.email,
+      p1_phone: p1.phone,
       p2_name: p2.name,
       p2_role: p2.role,
       p2_email: p2.email,
+      p2_phone: p2.phone,
       notes,
       status: 'pending',
       createdAt: Date.now()

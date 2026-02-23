@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { api } from '../api';
 import { Match } from '../types';
 import { User } from 'firebase/auth';
-import { Mail, MessageSquare, ExternalLink, User as UserIcon, ShieldCheck } from 'lucide-react';
+import { Mail, MessageSquare, ExternalLink, User as UserIcon, ShieldCheck, Phone, MessageCircle } from 'lucide-react';
 
 interface UserMatchesProps {
   user: User;
@@ -74,6 +74,7 @@ export const UserMatches: React.FC<UserMatchesProps> = ({ user, onNavigate, show
               const partnerName = isP1 ? match.p2_name : match.p1_name;
               const partnerRole = isP1 ? match.p2_role : match.p1_role;
               const partnerEmail = isP1 ? match.p2_email : match.p1_email;
+              const partnerPhone = isP1 ? match.p2_phone : match.p1_phone;
 
               return (
                 <motion.div
@@ -106,6 +107,12 @@ export const UserMatches: React.FC<UserMatchesProps> = ({ user, onNavigate, show
                             <Mail className="w-3.5 h-3.5" />
                             {partnerEmail}
                           </div>
+                          {partnerPhone && (
+                            <div className="flex items-center gap-2 text-[0.82rem] text-gray-custom">
+                              <Phone className="w-3.5 h-3.5" />
+                              {partnerPhone}
+                            </div>
+                          )}
                           <div className="flex items-center gap-2 text-[0.82rem] text-gray-custom">
                             <ShieldCheck className="w-3.5 h-3.5" />
                             Verified Match
@@ -114,13 +121,31 @@ export const UserMatches: React.FC<UserMatchesProps> = ({ user, onNavigate, show
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                       <a 
                         href={`mailto:${partnerEmail}`}
-                        className="flex-1 md:flex-none px-6 py-3 bg-white text-black font-bold text-[0.85rem] hover:bg-gray-200 transition-colors text-center text-lowercase"
+                        className="flex-1 md:flex-none px-4 py-2.5 bg-white text-black font-bold text-[0.8rem] hover:bg-gray-200 transition-colors text-center text-lowercase flex items-center justify-center gap-2"
                       >
-                        say hello →
+                        <Mail className="w-4 h-4" /> email
                       </a>
+                      {partnerPhone && (
+                        <>
+                          <a 
+                            href={`tel:${partnerPhone}`}
+                            className="flex-1 md:flex-none px-4 py-2.5 border border-border-custom text-white font-bold text-[0.8rem] hover:border-white transition-colors text-center text-lowercase flex items-center justify-center gap-2"
+                          >
+                            <Phone className="w-4 h-4" /> call
+                          </a>
+                          <a 
+                            href={`https://wa.me/${partnerPhone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 md:flex-none px-4 py-2.5 border border-border-custom text-white font-bold text-[0.8rem] hover:border-white transition-colors text-center text-lowercase flex items-center justify-center gap-2"
+                          >
+                            <MessageCircle className="w-4 h-4" /> whatsapp
+                          </a>
+                        </>
+                      )}
                     </div>
                   </div>
 

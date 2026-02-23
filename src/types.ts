@@ -35,9 +35,11 @@ export interface Match {
   p1_name?: string;
   p1_role?: string;
   p1_email?: string;
+  p1_phone?: string;
   p2_name?: string;
   p2_role?: string;
   p2_email?: string;
+  p2_phone?: string;
   notes?: string;
   status: 'pending' | 'introduced' | 'connected';
   createdAt: number;

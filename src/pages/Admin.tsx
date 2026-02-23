@@ -369,13 +369,13 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
                   <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 min-w-0">
                     <div className="min-w-0">
                       <div className="font-display font-bold text-[0.9rem] text-lowercase truncate">{m.p1_name}</div>
-                      <div className="text-[0.78rem] text-gray-custom mt-0.5 truncate">{m.p1_role} · {m.p1_email}</div>
+                      <div className="text-[0.78rem] text-gray-custom mt-0.5 truncate">{m.p1_role} · {m.p1_email} {m.p1_phone && `· ${m.p1_phone}`}</div>
                     </div>
                     <div className="hidden sm:block text-xl text-gray-custom opacity-30">🤝</div>
                     <div className="sm:hidden h-[1px] bg-border-custom w-full opacity-30" />
                     <div className="min-w-0">
                       <div className="font-display font-bold text-[0.9rem] text-lowercase truncate">{m.p2_name}</div>
-                      <div className="text-[0.78rem] text-gray-custom mt-0.5 truncate">{m.p2_role} · {m.p2_email}</div>
+                      <div className="text-[0.78rem] text-gray-custom mt-0.5 truncate">{m.p2_role} · {m.p2_email} {m.p2_phone && `· ${m.p2_phone}`}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
