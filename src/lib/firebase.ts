@@ -4,13 +4,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAe6UI0vKSBQFYXx4iuq0fu1dtrlR8QTHo",
-  authDomain: "foundrmatch-bc8ad.firebaseapp.com",
-  projectId: "foundrmatch-bc8ad",
-  storageBucket: "foundrmatch-bc8ad.firebasestorage.app",
-  messagingSenderId: "186065745705",
-  appId: "1:186065745705:web:b3d48b24241e486ef02938",
-  measurementId: "G-Z04ENCJDEM"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAe6UI0vKSBQFYXx4iuq0fu1dtrlR8QTHo",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "foundrmatch-bc8ad.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "foundrmatch-bc8ad",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "foundrmatch-bc8ad.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "186065745705",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:186065745705:web:b3d48b24241e486ef02938",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-Z04ENCJDEM"
 };
 
 // Initialize Firebase

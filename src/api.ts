@@ -110,6 +110,18 @@ export const api = {
     await deleteDoc(doc(db, "matches", id));
   },
 
+  async getUserMatches(userId: string): Promise<Match[]> {
+    const q1 = query(collection(db, "matches"), where("p1_id", "==", userId));
+    const q2 = query(collection(db, "matches"), where("p2_id", "==", userId));
+    
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    
+    const matches1 = snap1.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
+    const matches2 = snap2.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
+    
+    return [...matches1, ...matches2].sort((a, b) => b.createdAt - a.createdAt);
+  },
+
   async adminLogin(password: string): Promise<boolean> {
     // Simple client-side check as requested before, or we could use a function.
     // Keeping it simple for now.

@@ -3,13 +3,15 @@ import { motion } from 'motion/react';
 import { api } from '../api';
 import { Profile } from '../types';
 import { X, Plus, Rocket } from 'lucide-react';
+import { User } from 'firebase/auth';
 
 interface ProfileFormProps {
+  user: User;
   onNavigate: (page: string) => void;
   showToast: (msg: string, type?: 'success' | 'error') => void;
 }
 
-export const ProfileForm: React.FC<ProfileFormProps> = ({ onNavigate, showToast }) => {
+export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, showToast }) => {
   const [submitted, setSubmitted] = useState(false);
   const [skillInput, setSkillInput] = useState('');
   const [formData, setFormData] = useState({
@@ -55,7 +57,8 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ onNavigate, showToast 
     try {
       await api.createProfile({
         ...formData,
-        id: Date.now().toString(),
+        id: user.uid,
+        email: user.email || formData.email,
         createdAt: Date.now()
       });
       setSubmitted(true);

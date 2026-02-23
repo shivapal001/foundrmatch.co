@@ -9,6 +9,7 @@ import { Waitlist } from './pages/Waitlist';
 import { ProfileForm } from './pages/ProfileForm';
 import { Admin } from './pages/Admin';
 import { Auth } from './pages/Auth';
+import { UserMatches } from './pages/UserMatches';
 import { Toast, ToastMessage } from './components/Toast';
 import { initAnalytics, auth } from './lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
@@ -66,14 +67,24 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
-        <Auth showToast={showToast} />
-        <Toast toasts={toasts} removeToast={removeToast} />
-      </div>
-    );
-  }
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'landing':
+        return <Landing onNavigate={navigate} />;
+      case 'waitlist':
+        return <Waitlist onNavigate={navigate} showToast={showToast} />;
+      case 'profile':
+        return user ? <ProfileForm user={user} onNavigate={navigate} showToast={showToast} /> : <Auth showToast={showToast} />;
+      case 'matches':
+        return user ? <UserMatches user={user} onNavigate={navigate} showToast={showToast} /> : <Auth showToast={showToast} />;
+      case 'admin':
+        return <Admin onNavigate={navigate} showToast={showToast} />;
+      case 'auth':
+        return <Auth showToast={showToast} />;
+      default:
+        return <Landing onNavigate={navigate} />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
@@ -99,10 +110,16 @@ export default function App() {
             waitlist
           </button>
           <button 
-            onClick={() => navigate('profile')}
+            onClick={() => navigate(user ? 'profile' : 'auth')}
             className="px-3 sm:px-4 py-2 text-[0.85rem] text-gray-custom hover:text-white transition-colors text-lowercase"
           >
             profile
+          </button>
+          <button 
+            onClick={() => navigate(user ? 'matches' : 'auth')}
+            className="px-3 sm:px-4 py-2 text-[0.85rem] text-gray-custom hover:text-white transition-colors text-lowercase"
+          >
+            matches
           </button>
           <button 
             onClick={() => navigate('admin')}
@@ -110,21 +127,27 @@ export default function App() {
           >
             admin ↗
           </button>
-          <button 
-            onClick={handleLogout}
-            className="ml-2 px-4 py-2 bg-white/5 border border-border-custom text-gray-custom text-[0.85rem] font-semibold hover:text-white hover:border-white transition-colors text-lowercase"
-          >
-            logout
-          </button>
+          {user ? (
+            <button 
+              onClick={handleLogout}
+              className="ml-2 px-4 py-2 bg-white/5 border border-border-custom text-gray-custom text-[0.85rem] font-semibold hover:text-white hover:border-white transition-colors text-lowercase"
+            >
+              logout
+            </button>
+          ) : (
+            <button 
+              onClick={() => navigate('auth')}
+              className="ml-2 px-4 py-2 bg-white text-black text-[0.85rem] font-bold hover:bg-gray-200 transition-colors text-lowercase"
+            >
+              sign in
+            </button>
+          )}
         </div>
       </nav>
 
       {/* Pages */}
       <main>
-        {currentPage === 'landing' && <Landing onNavigate={navigate} />}
-        {currentPage === 'waitlist' && <Waitlist onNavigate={navigate} showToast={showToast} />}
-        {currentPage === 'profile' && <ProfileForm onNavigate={navigate} showToast={showToast} />}
-        {currentPage === 'admin' && <Admin onNavigate={navigate} showToast={showToast} />}
+        {renderPage()}
       </main>
 
       <Toast toasts={toasts} removeToast={removeToast} />
