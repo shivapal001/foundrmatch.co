@@ -13,12 +13,14 @@ import { UserMatches } from './pages/UserMatches';
 import { Toast, ToastMessage } from './components/Toast';
 import { initAnalytics, auth } from './lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { Menu, X as CloseIcon, LogOut, User as UserIcon, Briefcase, Home, ClipboardList, Shield } from 'lucide-react';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('landing');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     initAnalytics();
@@ -46,6 +48,7 @@ export default function App() {
 
   const navigate = (page: string) => {
     setCurrentPage(page);
+    setIsMenuOpen(false);
     window.scrollTo(0, 0);
   };
 
@@ -96,7 +99,9 @@ export default function App() {
         >
           foundr<span className="text-gray-custom">match</span>
         </div>
-        <div className="flex items-center gap-1 sm:gap-2">
+
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center gap-1 sm:gap-2">
           <button 
             onClick={() => navigate('landing')}
             className="px-3 sm:px-4 py-2 text-[0.85rem] text-gray-custom hover:text-white transition-colors text-lowercase"
@@ -143,7 +148,53 @@ export default function App() {
             </button>
           )}
         </div>
+
+        {/* Mobile Menu Toggle */}
+        <button 
+          className="md:hidden p-2 text-gray-custom hover:text-white transition-colors"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? <CloseIcon className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`fixed inset-0 z-[999] bg-black transition-transform duration-300 md:hidden ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="pt-32 px-6 flex flex-col gap-8">
+          <button onClick={() => navigate('landing')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <Home className="w-6 h-6 text-gray-custom" /> home
+          </button>
+          <button onClick={() => navigate('waitlist')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <ClipboardList className="w-6 h-6 text-gray-custom" /> waitlist
+          </button>
+          <button onClick={() => navigate(user ? 'profile' : 'auth')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <UserIcon className="w-6 h-6 text-gray-custom" /> profile
+          </button>
+          <button onClick={() => navigate(user ? 'matches' : 'auth')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <Briefcase className="w-6 h-6 text-gray-custom" /> matches
+          </button>
+          <button onClick={() => navigate('admin')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <Shield className="w-6 h-6 text-gray-custom" /> admin panel
+          </button>
+          <div className="mt-8 pt-8 border-t border-border-custom">
+            {user ? (
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase text-red-500"
+              >
+                <LogOut className="w-6 h-6" /> logout
+              </button>
+            ) : (
+              <button 
+                onClick={() => navigate('auth')}
+                className="w-full py-4 bg-white text-black font-bold text-xl text-lowercase"
+              >
+                sign in
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Pages */}
       <main>

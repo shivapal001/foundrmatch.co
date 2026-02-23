@@ -73,25 +73,25 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="flex gap-12 mt-16 pt-12 border-t border-border-custom"
+            className="flex flex-wrap gap-8 sm:gap-12 mt-16 pt-12 border-t border-border-custom"
           >
-            <div>
-              <div className="font-display text-4xl font-extrabold tracking-tighter leading-none">
+            <div className="flex-1 min-w-[100px]">
+              <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
                 {stats.profiles}<span className="text-gray-custom">+</span>
               </div>
-              <div className="text-[0.75rem] text-gray-custom mt-2 text-lowercase">profiles created</div>
+              <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">profiles created</div>
             </div>
-            <div>
-              <div className="font-display text-4xl font-extrabold tracking-tighter leading-none">
+            <div className="flex-1 min-w-[100px]">
+              <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
                 {stats.matches}<span className="text-gray-custom">+</span>
               </div>
-              <div className="text-[0.75rem] text-gray-custom mt-2 text-lowercase">matches made</div>
+              <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">matches made</div>
             </div>
-            <div>
-              <div className="font-display text-4xl font-extrabold tracking-tighter leading-none">
+            <div className="flex-1 min-w-[100px]">
+              <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
                 {stats.connections}<span className="text-gray-custom">+</span>
               </div>
-              <div className="text-[0.75rem] text-gray-custom mt-2 text-lowercase">connected</div>
+              <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">connected</div>
             </div>
           </motion.div>
         </div>

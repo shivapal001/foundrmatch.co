@@ -189,7 +189,7 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
         </div>
 
         {/* Tabs */}
-        <div className="flex border border-border-custom mb-10 w-fit">
+        <div className="flex border border-border-custom mb-10 w-full sm:w-fit overflow-x-auto no-scrollbar">
           {(['profiles', 'matches', 'waitlist'] as const).map(tab => (
             <button
               key={tab}
@@ -356,19 +356,20 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
           <div className="space-y-[1px] bg-border-custom border border-border-custom">
             {matches.length > 0 ? (
               matches.map(m => (
-                <div key={m.id} className="bg-black p-7 flex flex-wrap items-center gap-6 hover:bg-white/5 transition-colors">
-                  <div className="flex-1 flex items-center gap-6 min-w-[300px]">
-                    <div>
-                      <div className="font-display font-bold text-[0.9rem] text-lowercase">{m.p1_name}</div>
-                      <div className="text-[0.78rem] text-gray-custom mt-0.5">{m.p1_role} · {m.p1_email}</div>
+                <div key={m.id} className="bg-black p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-6 hover:bg-white/5 transition-colors">
+                  <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 min-w-0">
+                    <div className="min-w-0">
+                      <div className="font-display font-bold text-[0.9rem] text-lowercase truncate">{m.p1_name}</div>
+                      <div className="text-[0.78rem] text-gray-custom mt-0.5 truncate">{m.p1_role} · {m.p1_email}</div>
                     </div>
-                    <div className="text-xl text-gray-custom opacity-30">🤝</div>
-                    <div>
-                      <div className="font-display font-bold text-[0.9rem] text-lowercase">{m.p2_name}</div>
-                      <div className="text-[0.78rem] text-gray-custom mt-0.5">{m.p2_role} · {m.p2_email}</div>
+                    <div className="hidden sm:block text-xl text-gray-custom opacity-30">🤝</div>
+                    <div className="sm:hidden h-[1px] bg-border-custom w-full opacity-30" />
+                    <div className="min-w-0">
+                      <div className="font-display font-bold text-[0.9rem] text-lowercase truncate">{m.p2_name}</div>
+                      <div className="text-[0.78rem] text-gray-custom mt-0.5 truncate">{m.p2_role} · {m.p2_email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
                     <span className={`px-3 py-1 text-[0.68rem] font-bold tracking-widest uppercase border ${
                       m.status === 'pending' ? 'border-border-custom text-gray-custom' : 'border-white/30 text-white'
                     }`}>
