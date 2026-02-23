@@ -69,7 +69,7 @@ export const UserMatches: React.FC<UserMatchesProps> = ({ user, onNavigate, show
           </motion.div>
         ) : (
           <div className="space-y-6">
-            {matches.map((match) => {
+            {matches.map((match, index) => {
               const isP1 = match.p1_id === user.uid;
               const partnerName = isP1 ? match.p2_name : match.p1_name;
               const partnerRole = isP1 ? match.p2_role : match.p1_role;
@@ -78,9 +78,11 @@ export const UserMatches: React.FC<UserMatchesProps> = ({ user, onNavigate, show
               return (
                 <motion.div
                   key={match.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-black border border-border-custom p-8 hover:border-white/30 transition-all group"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ borderColor: 'rgba(255,255,255,0.5)' }}
+                  className="bg-black border border-border-custom p-8 transition-all group"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-start gap-5">

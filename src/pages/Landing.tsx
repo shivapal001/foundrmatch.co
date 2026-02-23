@@ -55,18 +55,22 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap gap-3"
           >
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate('profile')}
               className="flex items-center gap-2 px-6 py-3 bg-white text-black text-[0.85rem] font-semibold hover:bg-gray-200 transition-colors text-lowercase"
             >
               create your profile <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate('waitlist')}
               className="flex items-center gap-2 px-6 py-3 border border-border-custom text-white text-[0.85rem] font-semibold hover:border-white transition-colors text-lowercase"
             >
               join waitlist
-            </button>
+            </motion.button>
           </motion.div>
 
           <motion.div
@@ -138,12 +142,24 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
             { id: '05', icon: <Zap className="w-6 h-6" />, title: 'structured profiles', desc: "Rich, structured profiles that surface what matters — stage, industry, vision, and what you're looking for." },
             { id: '06', icon: <Trophy className="w-6 h-6" />, title: 'zero noise', desc: 'No cold DMs, no spam. Admin-facilitated introductions only. Your time is valuable.' },
           ].map((f, i) => (
-            <div key={i} className="p-10 border-r border-b border-border-custom hover:bg-white/5 transition-colors group">
+            <motion.div 
+              key={i} 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="p-10 border-r border-b border-border-custom hover:bg-white/5 transition-colors group cursor-default"
+            >
               <div className="font-display text-[0.7rem] font-bold text-white/15 tracking-[2px] mb-6">{f.id}</div>
-              <div className="mb-5 text-white">{f.icon}</div>
+              <motion.div 
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="mb-5 text-white w-fit"
+              >
+                {f.icon}
+              </motion.div>
               <h3 className="font-display text-[1.05rem] font-bold mb-3 text-lowercase tracking-tight">{f.title}</h3>
               <p className="text-[0.85rem] text-gray-custom leading-relaxed font-light">{f.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -159,12 +175,14 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
             ready to find your<br />co-founder?
           </h2>
           <p className="text-gray-custom mb-10 text-[0.95rem] font-light">Join 50+ founders already building their dream team on FoundrMatch.</p>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onNavigate('profile')}
             className="px-8 py-4 bg-white text-black text-[0.9rem] font-bold hover:bg-gray-200 transition-colors text-lowercase"
           >
             create your profile — it's free →
-          </button>
+          </motion.button>
         </div>
       </div>
 

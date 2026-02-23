@@ -283,9 +283,12 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border-custom border border-border-custom">
               {filteredProfiles.length > 0 ? (
-                filteredProfiles.map(p => (
-                  <div
+                filteredProfiles.map((p, index) => (
+                  <motion.div
                     key={p.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     className={`bg-black p-7 transition-colors relative group ${
                       selectedForMatch.find(s => s.id === p.id) ? 'ring-1 ring-inset ring-white bg-white/5' : 'hover:bg-white/5'
                     }`}
@@ -338,7 +341,7 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
                         delete
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               ) : (
                 <div className="bg-black p-20 text-center col-span-full">
@@ -355,8 +358,14 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
         {activeTab === 'matches' && (
           <div className="space-y-[1px] bg-border-custom border border-border-custom">
             {matches.length > 0 ? (
-              matches.map(m => (
-                <div key={m.id} className="bg-black p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-6 hover:bg-white/5 transition-colors">
+              matches.map((m, index) => (
+                <motion.div 
+                  key={m.id} 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-black p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-6 hover:bg-white/5 transition-colors"
+                >
                   <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 min-w-0">
                     <div className="min-w-0">
                       <div className="font-display font-bold text-[0.9rem] text-lowercase truncate">{m.p1_name}</div>
@@ -403,7 +412,7 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
                       📝 {m.notes}
                     </div>
                   )}
-                </div>
+                </motion.div>
               ))
             ) : (
               <div className="bg-black p-20 text-center">
@@ -419,8 +428,14 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
         {activeTab === 'waitlist' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border-custom border border-border-custom">
             {waitlist.length > 0 ? (
-              waitlist.map(w => (
-                <div key={w.id} className="bg-black p-7 hover:bg-white/5 transition-colors">
+              waitlist.map((w, index) => (
+                <motion.div 
+                  key={w.id} 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-black p-7 hover:bg-white/5 transition-colors"
+                >
                   <div className="flex items-center gap-4 mb-5">
                     <div className="w-11 h-11 bg-white text-black flex items-center justify-center font-display text-[0.9rem] font-extrabold flex-shrink-0">
                       {w.name.slice(0, 2).toUpperCase()}
@@ -445,7 +460,7 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
                   >
                     remove
                   </button>
-                </div>
+                </motion.div>
               ))
             ) : (
               <div className="bg-black p-20 text-center col-span-full">

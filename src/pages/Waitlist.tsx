@@ -66,18 +66,22 @@ export const Waitlist: React.FC<WaitlistProps> = ({ onNavigate, showToast }) => 
             We'll reach out when we find your match. In the meantime, create your full profile to speed up the process.
           </p>
           <div className="flex flex-col gap-3">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate('profile')}
               className="px-6 py-3 bg-white text-black text-[0.9rem] font-bold hover:bg-gray-200 transition-colors text-lowercase flex items-center justify-center gap-2"
             >
               create full profile <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate('landing')}
               className="px-6 py-3 border border-border-custom text-white text-[0.9rem] font-bold hover:border-white transition-colors text-lowercase"
             >
               back to home
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </div>
@@ -185,12 +189,14 @@ export const Waitlist: React.FC<WaitlistProps> = ({ onNavigate, showToast }) => 
             </select>
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
             className="w-full py-4 bg-white text-black text-[0.9rem] font-bold hover:bg-gray-200 transition-colors text-lowercase mt-8"
           >
             join waitlist →
-          </button>
+          </motion.button>
           
           <p className="text-center text-[0.78rem] text-gray-custom font-light">
             No spam. We'll only reach out when you're matched. 🔒

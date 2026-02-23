@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { auth, googleProvider } from '../lib/firebase';
 import { 
   signInWithEmailAndPassword, 
@@ -77,12 +77,22 @@ export const Auth: React.FC<AuthProps> = ({ showToast }) => {
         className="bg-black border border-border-custom p-10 max-w-[400px] w-full"
       >
         <div className="text-3xl opacity-30 mb-6 text-center">⌗</div>
-        <h2 className="font-display text-2xl font-extrabold tracking-tight mb-2 text-lowercase text-center">
-          {isSignUp ? 'create account' : 'sign in'}
-        </h2>
-        <p className="text-gray-custom text-[0.88rem] mb-8 font-light text-center">
-          {isSignUp ? 'Join the co-founder network' : 'Welcome back to FoundrMatch'}
-        </p>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={isSignUp ? 'signup' : 'signin'}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h2 className="font-display text-2xl font-extrabold tracking-tight mb-2 text-lowercase text-center">
+              {isSignUp ? 'create account' : 'sign in'}
+            </h2>
+            <p className="text-gray-custom text-[0.88rem] mb-8 font-light text-center">
+              {isSignUp ? 'Join the co-founder network' : 'Welcome back to FoundrMatch'}
+            </p>
+          </motion.div>
+        </AnimatePresence>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -108,13 +118,15 @@ export const Auth: React.FC<AuthProps> = ({ showToast }) => {
             />
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
             className={`w-full py-3 bg-white text-black font-bold hover:bg-gray-200 transition-colors text-lowercase mt-4 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {loading ? 'processing...' : (isSignUp ? 'sign up →' : 'sign in →')}
-          </button>
+          </motion.button>
         </form>
 
         <div className="mt-4">
@@ -127,7 +139,9 @@ export const Auth: React.FC<AuthProps> = ({ showToast }) => {
             </div>
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleGoogleSignIn}
             disabled={loading}
             className={`w-full py-3 border border-border-custom text-white font-bold hover:border-white transition-colors text-lowercase flex items-center justify-center gap-3 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -151,7 +165,7 @@ export const Auth: React.FC<AuthProps> = ({ showToast }) => {
               />
             </svg>
             sign in with google
-          </button>
+          </motion.button>
         </div>
 
         <div className="mt-8 pt-6 border-t border-border-custom text-center">

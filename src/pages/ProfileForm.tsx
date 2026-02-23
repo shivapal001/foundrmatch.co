@@ -149,18 +149,22 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, show
               : "Your profile is under review. We'll reach out within 48 hours when we find a compatible co-founder. Keep an eye on your email and WhatsApp!"}
           </p>
           <div className="flex flex-col gap-3">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate('matches')}
               className="px-8 py-4 bg-white text-black text-[0.9rem] font-bold hover:bg-gray-200 transition-colors text-lowercase"
             >
               view matches
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate('landing')}
               className="px-8 py-4 border border-border-custom text-white text-[0.9rem] font-bold hover:border-white transition-colors text-lowercase"
             >
               back to home
-            </button>
+            </motion.button>
           </div>
         </motion.div>
       </div>
@@ -422,7 +426,9 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, show
             </div>
           </section>
 
-          <button
+          <motion.button
+            whileHover={progress === 100 ? { scale: 1.02 } : {}}
+            whileTap={progress === 100 ? { scale: 0.98 } : {}}
             onClick={handleSubmit}
             className={`w-full py-5 text-[0.9rem] font-bold transition-all text-lowercase mt-8 flex items-center justify-center gap-2 ${
               progress === 100
@@ -431,7 +437,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, show
             }`}
           >
             submit profile & get matched →
-          </button>
+          </motion.button>
           
           <p className="text-center text-[0.78rem] text-gray-custom font-light">
             We'll review your profile within 48 hours and reach out when we find a match. 🔒

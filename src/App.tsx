@@ -14,6 +14,7 @@ import { Toast, ToastMessage } from './components/Toast';
 import { initAnalytics, auth } from './lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { Menu, X as CloseIcon, LogOut, User as UserIcon, Briefcase, Home, ClipboardList, Shield } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -198,7 +199,17 @@ export default function App() {
 
       {/* Pages */}
       <main>
-        {renderPage()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
+            {renderPage()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <Toast toasts={toasts} removeToast={removeToast} />
