@@ -40,6 +40,11 @@ export const api = {
     return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Profile));
   },
 
+  async getProfile(id: string): Promise<Profile | null> {
+    const snap = await getDoc(doc(db, "profiles", id));
+    return snap.exists() ? (snap.data() as Profile) : null;
+  },
+
   async createProfile(profile: Profile): Promise<void> {
     await setDoc(doc(db, "profiles", profile.id), profile);
   },
@@ -125,6 +130,6 @@ export const api = {
   async adminLogin(password: string): Promise<boolean> {
     // Simple client-side check as requested before, or we could use a function.
     // Keeping it simple for now.
-    return password === "admin123";
+    return password === "shivapal";
   }
 };

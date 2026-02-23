@@ -13,6 +13,8 @@ interface ProfileFormProps {
 
 export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, showToast }) => {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasExistingProfile, setHasExistingProfile] = useState(false);
   const [skillInput, setSkillInput] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -32,6 +34,38 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, show
   });
 
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const checkExistingProfile = async () => {
+      try {
+        const profile = await api.getProfile(user.uid);
+        if (profile) {
+          setHasExistingProfile(true);
+          setFormData({
+            name: profile.name || '',
+            location: profile.location || '',
+            email: profile.email || '',
+            phone: profile.phone || '',
+            linkedin: profile.linkedin || '',
+            role: profile.role || '',
+            exp: profile.exp || '',
+            skills: profile.skills || [],
+            stage: profile.stage || '',
+            commitment: profile.commitment || '',
+            industries: profile.industries || [],
+            looking: profile.looking || '',
+            bio: profile.bio || '',
+            idea: profile.idea || ''
+          });
+        }
+      } catch (err) {
+        console.error("Error checking profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkExistingProfile();
+  }, [user.uid]);
 
   useEffect(() => {
     const requiredFields = ['name', 'location', 'email', 'bio', 'role', 'commitment', 'looking'];
@@ -89,7 +123,15 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, show
     }));
   };
 
-  if (submitted) {
+  if (loading) {
+    return (
+      <div className="pt-32 min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white font-display text-xl animate-pulse">loading profile...</div>
+      </div>
+    );
+  }
+
+  if (submitted || hasExistingProfile) {
     return (
       <div className="pt-32 min-h-screen bg-black flex items-center justify-center p-6">
         <motion.div
@@ -97,17 +139,29 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ user, onNavigate, show
           animate={{ opacity: 1, scale: 1 }}
           className="text-center max-w-md"
         >
-          <div className="text-5xl mb-8">🚀</div>
-          <h2 className="font-display text-3xl font-extrabold tracking-tight mb-4 text-lowercase">profile submitted!</h2>
+          <div className="text-5xl mb-8">{hasExistingProfile ? '✨' : '🚀'}</div>
+          <h2 className="font-display text-3xl font-extrabold tracking-tight mb-4 text-lowercase">
+            {hasExistingProfile ? 'profile already exists!' : 'profile submitted!'}
+          </h2>
           <p className="text-gray-custom mb-8 font-light leading-relaxed">
-            Your profile is under review. We'll reach out within 48 hours when we find a compatible co-founder. Keep an eye on your email and WhatsApp!
+            {hasExistingProfile 
+              ? "You've already created a profile. Our team is reviewing it to find your perfect co-founder match. You can check your matches in the 'Matches' tab."
+              : "Your profile is under review. We'll reach out within 48 hours when we find a compatible co-founder. Keep an eye on your email and WhatsApp!"}
           </p>
-          <button
-            onClick={() => onNavigate('landing')}
-            className="px-8 py-4 border border-border-custom text-white text-[0.9rem] font-bold hover:border-white transition-colors text-lowercase"
-          >
-            back to home
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => onNavigate('matches')}
+              className="px-8 py-4 bg-white text-black text-[0.9rem] font-bold hover:bg-gray-200 transition-colors text-lowercase"
+            >
+              view matches
+            </button>
+            <button
+              onClick={() => onNavigate('landing')}
+              className="px-8 py-4 border border-border-custom text-white text-[0.9rem] font-bold hover:border-white transition-colors text-lowercase"
+            >
+              back to home
+            </button>
+          </div>
         </motion.div>
       </div>
     );
