@@ -1,14 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../api';
-import { Stats } from '../types';
-import { ArrowRight, Target, Users, Globe, ShieldCheck, Zap, Trophy } from 'lucide-react';
+import { Stats, Review } from '../types';
+import { ArrowRight, Target, Users, Globe, ShieldCheck, Zap, Trophy, Star, Quote, X } from 'lucide-react';
 
 interface LandingProps {
   onNavigate: (page: string) => void;
+  user?: any; // Add user prop to check if logged in
 }
 
-export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
+export const Landing: React.FC<LandingProps> = ({ onNavigate, user }) => {
+  const [reviews, setReviews] = React.useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = React.useState(false);
+  const [newReview, setNewReview] = React.useState({ rating: 5, comment: '' });
+  const [submitting, setSubmitting] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchReviews = async () => {
+      const data = await api.getApprovedReviews();
+      setReviews(data);
+    };
+    fetchReviews();
+  }, []);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setSubmitting(true);
+    try {
+      await api.submitReview({
+        userId: user.uid,
+        userName: user.displayName || user.email?.split('@')[0] || 'Anonymous',
+        userRole: 'Founder', // Default or fetch from profile
+        rating: newReview.rating,
+        comment: newReview.comment
+      });
+      setShowReviewForm(false);
+      setNewReview({ rating: 5, comment: '' });
+      alert('Review submitted for approval! Thank you.');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0 });
 
   useEffect(() => {
@@ -163,6 +198,136 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
           ))}
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <div className="py-24 px-6 lg:px-10 border-b border-border-custom">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div className="max-w-[600px]">
+              <div className="text-[0.7rem] text-gray-custom tracking-[3px] uppercase mb-5 font-semibold">testimonials</div>
+              <h2 className="font-display text-4xl font-extrabold tracking-tight text-lowercase leading-[1.1]">
+                what founders are saying<br />about foundrmatch
+              </h2>
+            </div>
+            {user && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowReviewForm(true)}
+                className="px-6 py-3 border border-border-custom text-white text-[0.85rem] font-semibold hover:border-white transition-colors text-lowercase"
+              >
+                write a review
+              </motion.button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {reviews.length > 0 ? (
+              reviews.map((review, i) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-8 border border-border-custom bg-white/5 relative group"
+                >
+                  <Quote className="absolute top-6 right-6 w-8 h-8 text-white/5 group-hover:text-white/10 transition-colors" />
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${i < review.rating ? 'text-white fill-white' : 'text-white/20'}`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-[0.95rem] text-gray-custom font-light leading-relaxed mb-8 italic">
+                    "{review.comment}"
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white text-black flex items-center justify-center font-display font-bold text-sm">
+                      {review.userName.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-display font-bold text-[0.9rem] text-lowercase">{review.userName}</div>
+                      <div className="text-[0.75rem] text-gray-custom uppercase tracking-widest font-medium">{review.userRole}</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center border border-dashed border-border-custom">
+                <p className="text-gray-custom font-light">No reviews yet. Be the first to share your experience!</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Review Modal */}
+      <AnimatePresence>
+        {showReviewForm && (
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-black border border-border-custom p-10 max-w-[500px] w-full"
+            >
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <h2 className="font-display text-2xl font-extrabold tracking-tight mb-2 text-lowercase">write a review</h2>
+                  <p className="text-gray-custom text-[0.88rem] font-light">Share your experience with the community</p>
+                </div>
+                <button onClick={() => setShowReviewForm(false)} className="text-gray-custom hover:text-white transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleReviewSubmit} className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-[0.7rem] font-semibold text-gray-custom tracking-widest uppercase">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewReview({ ...newReview, rating: star })}
+                        className="transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`w-8 h-8 ${star <= newReview.rating ? 'text-white fill-white' : 'text-white/20'}`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[0.7rem] font-semibold text-gray-custom tracking-widest uppercase">Your Comment</label>
+                  <textarea
+                    required
+                    placeholder="How was your experience finding a co-founder?"
+                    className="w-full bg-black border border-border-custom px-4 py-3 text-[0.9rem] font-light outline-none focus:border-white transition-colors min-h-[120px] resize-none"
+                    value={newReview.comment}
+                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  />
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={submitting}
+                  type="submit"
+                  className="w-full py-4 bg-white text-black font-bold hover:bg-gray-200 transition-colors text-lowercase disabled:opacity-50"
+                >
+                  {submitting ? 'submitting...' : 'submit review →'}
+                </motion.button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* CTA */}
       <div className="border-y border-border-custom py-32 px-6 text-center bg-section-bg relative overflow-hidden">
