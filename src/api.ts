@@ -1,4 +1,4 @@
-import { Profile, WaitlistEntry, Match, Stats, Review } from "./types";
+import { Profile, WaitlistEntry, Match, Stats } from "./types";
 import { db } from "./lib/firebase";
 import { 
   collection, 
@@ -12,43 +12,32 @@ import {
   updateDoc,
   getDoc,
   where,
-  getCountFromServer,
-  limit
+  getCountFromServer
 } from "firebase/firestore";
 
 export const api = {
   async getStats(): Promise<Stats> {
-    try {
-      const profilesColl = collection(db, "profiles");
-      const matchesColl = collection(db, "matches");
-      const connectionsQuery = query(collection(db, "matches"), where("status", "==", "connected"));
+    const profilesColl = collection(db, "profiles");
+    const matchesColl = collection(db, "matches");
+    const connectionsQuery = query(collection(db, "matches"), where("status", "==", "connected"));
 
-      const [profilesSnap, matchesSnap, connectionsSnap] = await Promise.all([
-        getCountFromServer(profilesColl),
-        getCountFromServer(matchesColl),
-        getCountFromServer(connectionsQuery)
-      ]);
+    const [profilesSnap, matchesSnap, connectionsSnap] = await Promise.all([
+      getCountFromServer(profilesColl),
+      getCountFromServer(matchesColl),
+      getCountFromServer(connectionsQuery)
+    ]);
 
-      return {
-        profiles: profilesSnap.data().count,
-        matches: matchesSnap.data().count,
-        connections: connectionsSnap.data().count
-      };
-    } catch (err) {
-      console.error("Error fetching stats:", err);
-      return { profiles: 0, matches: 0, connections: 0 };
-    }
+    return {
+      profiles: profilesSnap.data().count,
+      matches: matchesSnap.data().count,
+      connections: connectionsSnap.data().count
+    };
   },
 
   async getProfiles(): Promise<Profile[]> {
-    try {
-      const q = query(collection(db, "profiles"), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Profile));
-    } catch (err) {
-      console.error("Error fetching profiles:", err);
-      return [];
-    }
+    const q = query(collection(db, "profiles"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Profile));
   },
 
   async getProfile(id: string): Promise<Profile | null> {
@@ -144,41 +133,5 @@ export const api = {
     // Simple client-side check as requested before, or we could use a function.
     // Keeping it simple for now.
     return password === "shivapal";
-  },
-
-  async submitReview(review: Omit<Review, 'id' | 'status' | 'createdAt'>): Promise<void> {
-    const id = Date.now().toString();
-    const reviewData: Review = {
-      ...review,
-      id,
-      status: 'pending',
-      createdAt: Date.now()
-    };
-    await setDoc(doc(db, "reviews", id), reviewData);
-  },
-
-  async getApprovedReviews(): Promise<Review[]> {
-    const q = query(
-      collection(db, "reviews"), 
-      where("status", "==", "approved"),
-      orderBy("createdAt", "desc"),
-      limit(10)
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Review));
-  },
-
-  async getAllReviews(): Promise<Review[]> {
-    const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Review));
-  },
-
-  async updateReviewStatus(id: string, status: 'approved' | 'pending'): Promise<void> {
-    await updateDoc(doc(db, "reviews", id), { status });
-  },
-
-  async deleteReview(id: string): Promise<void> {
-    await deleteDoc(doc(db, "reviews", id));
   }
 };

@@ -50,14 +50,3 @@ export interface Stats {
   matches: number;
   connections: number;
 }
-
-export interface Review {
-  id: string;
-  userId: string;
-  userName: string;
-  userRole: string;
-  rating: number;
-  comment: string;
-  createdAt: number;
-  status: 'pending' | 'approved';
-}
