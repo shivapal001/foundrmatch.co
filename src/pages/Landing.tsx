@@ -3,24 +3,28 @@ import { motion } from 'motion/react';
 import { api } from '../api';
 import { Stats } from '../types';
 import { ArrowRight, Target, Users, Globe, ShieldCheck, Zap, Trophy } from 'lucide-react';
+import { ReviewSection } from '../components/ReviewSection';
 
 import { User } from 'firebase/auth';
 
 interface LandingProps {
   onNavigate: (page: string) => void;
   user: User | null;
+  showToast: (msg: string, type?: 'success' | 'error') => void;
 }
 
-export const Landing: React.FC<LandingProps> = ({ onNavigate, user }) => {
-  const [stats, setStats] = useState<Stats | null>(null);
+export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast }) => {
+  const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0, teamRequests: 0 });
 
   useEffect(() => {
+    if (!user) return;
+    
     const fetchStats = async () => {
       try {
         const s = await api.getStats();
         setStats(s);
       } catch (err) {
-        // Silently fail for public/initial states
+        console.error("Failed to fetch stats:", err);
       }
     };
     fetchStats();
@@ -92,19 +96,19 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user }) => {
           >
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
-                {stats ? stats.profiles : '0'}<span className="text-gray-custom">+</span>
+                {stats.profiles}<span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">profiles created</div>
             </div>
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
-                {stats ? stats.matches : '0'}<span className="text-gray-custom">+</span>
+                {stats.matches}<span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">matches made</div>
             </div>
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
-                {stats ? stats.connections : '0'}<span className="text-gray-custom">+</span>
+                {stats.connections}<span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">connected</div>
             </div>
@@ -214,6 +218,8 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user }) => {
           </div>
         </div>
       </div>
+
+      <ReviewSection showToast={showToast} />
 
       {/* CTA */}
       <div className="border-y border-border-custom py-32 px-6 text-center bg-section-bg relative overflow-hidden">

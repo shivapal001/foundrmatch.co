@@ -64,3 +64,13 @@ export interface TeamRequest {
   equity?: string;
   createdAt: number;
 }
+
+export interface Review {
+  id: string;
+  name: string;
+  role: string;
+  rating: number;
+  content: string;
+  createdAt: number;
+  isApproved: boolean;
+}

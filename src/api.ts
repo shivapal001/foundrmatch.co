@@ -1,4 +1,4 @@
-import { Profile, WaitlistEntry, Match, Stats, TeamRequest } from "./types";
+import { Profile, WaitlistEntry, Match, Stats, TeamRequest, Review } from "./types";
 import { db } from "./lib/firebase";
 import { 
   collection, 
@@ -160,6 +160,50 @@ export const api = {
     const matches2 = snap2.docs.map(doc => ({ ...doc.data(), id: doc.id } as Match));
     
     return [...matches1, ...matches2].sort((a, b) => b.createdAt - a.createdAt);
+  },
+
+  async getReviews(onlyApproved: boolean = true): Promise<Review[]> {
+    try {
+      const q = query(
+        collection(db, "waitlist"), 
+        where("type", "==", "review"),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      const reviews = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Review));
+      return onlyApproved ? reviews.filter(r => r.isApproved) : reviews;
+    } catch (e) {
+      console.warn("Reviews query failed, falling back to client-side filtering", e);
+      const q2 = query(collection(db, "waitlist"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q2);
+      const all = snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as any));
+      const reviews = all.filter(doc => doc.type === 'review') as Review[];
+      return onlyApproved ? reviews.filter(r => r.isApproved) : reviews;
+    }
+  },
+
+  async createReview(review: Omit<Review, 'id' | 'createdAt' | 'isApproved'>): Promise<void> {
+    try {
+      const newDocRef = doc(collection(db, "waitlist"));
+      await setDoc(newDocRef, {
+        ...review,
+        id: newDocRef.id,
+        type: 'review',
+        isApproved: false, // Default to unapproved for safety
+        createdAt: Date.now()
+      });
+    } catch (error) {
+      console.error("Error creating review:", error);
+      throw error;
+    }
+  },
+
+  async approveReview(id: string): Promise<void> {
+    await updateDoc(doc(db, "waitlist", id), { isApproved: true });
+  },
+
+  async deleteReview(id: string): Promise<void> {
+    await deleteDoc(doc(db, "waitlist", id));
   },
 
   async adminLogin(password: string): Promise<boolean> {

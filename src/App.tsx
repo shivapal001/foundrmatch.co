@@ -87,7 +87,7 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'landing':
-        return <Landing onNavigate={navigate} user={user} />;
+        return <Landing onNavigate={navigate} user={user} showToast={showToast} />;
       case 'waitlist':
         return <Waitlist onNavigate={navigate} showToast={showToast} />;
       case 'profile':

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../api';
-import { Profile, WaitlistEntry, Match, Stats, TeamRequest } from '../types';
-import { Search, Filter, Plus, Trash2, Check, X, ExternalLink, MapPin, Mail, Phone, Linkedin, MessageSquare, Briefcase } from 'lucide-react';
+import { Profile, WaitlistEntry, Match, Stats, TeamRequest, Review } from '../types';
+import { Search, Filter, Plus, Trash2, Check, X, ExternalLink, MapPin, Mail, Phone, Linkedin, MessageSquare, Briefcase, Star } from 'lucide-react';
 
 interface AdminProps {
   onNavigate: (page: string) => void;
@@ -12,12 +12,13 @@ interface AdminProps {
 export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'profiles' | 'matches' | 'waitlist' | 'teamRequests'>('profiles');
+  const [activeTab, setActiveTab] = useState<'profiles' | 'matches' | 'waitlist' | 'teamRequests' | 'reviews'>('profiles');
   const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0, teamRequests: 0 });
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
   const [teamRequests, setTeamRequests] = useState<TeamRequest[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -38,12 +39,13 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
 
   const fetchData = async () => {
     try {
-      const [s, p, m, w, t] = await Promise.allSettled([
+      const [s, p, m, w, t, r] = await Promise.allSettled([
         api.getStats(true),
         api.getProfiles(),
         api.getMatches(),
         api.getWaitlist(),
-        api.getTeamRequests()
+        api.getTeamRequests(),
+        api.getReviews(false)
       ]);
       
       if (s.status === 'fulfilled') setStats(s.value);
@@ -51,8 +53,9 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
       if (m.status === 'fulfilled') setMatches(m.value);
       if (w.status === 'fulfilled') setWaitlist(w.value);
       if (t.status === 'fulfilled') setTeamRequests(t.value);
+      if (r.status === 'fulfilled') setReviews(r.value);
 
-      const rejected = [s, p, m, w, t].filter(r => r.status === 'rejected');
+      const rejected = [s, p, m, w, t, r].filter(r => r.status === 'rejected');
       if (rejected.length > 0) {
         console.error("Some data failed to load:", rejected);
         showToast('Some data could not be loaded due to permissions', 'error');
@@ -102,6 +105,20 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
       await api.deleteTeamRequest(id);
       fetchData();
       showToast('Request deleted', 'error');
+    }
+  };
+
+  const handleApproveReview = async (id: string) => {
+    await api.approveReview(id);
+    fetchData();
+    showToast('Review approved', 'success');
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (confirm('Delete this review?')) {
+      await api.deleteReview(id);
+      fetchData();
+      showToast('Review deleted', 'error');
     }
   };
 
@@ -214,7 +231,7 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
 
         {/* Tabs */}
         <div className="flex border border-border-custom mb-10 w-full sm:w-fit overflow-x-auto no-scrollbar">
-          {(['profiles', 'matches', 'waitlist', 'teamRequests'] as const).map(tab => (
+          {(['profiles', 'matches', 'waitlist', 'teamRequests', 'reviews'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -560,6 +577,68 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
                 <div className="text-4xl opacity-20 mb-4">💼</div>
                 <h3 className="font-display font-bold text-white mb-2 text-lowercase">no team requests yet</h3>
                 <p className="text-gray-custom text-sm font-light">Startups will submit requests here when they need team members</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Reviews Tab */}
+        {activeTab === 'reviews' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-border-custom border border-border-custom">
+            {reviews.length > 0 ? (
+              reviews.map((r, index) => (
+                <motion.div 
+                  key={r.id} 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-black p-8 hover:bg-white/5 transition-colors flex flex-col"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-3 h-3 ${i < r.rating ? 'fill-white text-white' : 'text-white/10'}`} />
+                      ))}
+                    </div>
+                    {!r.isApproved && (
+                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[0.6rem] font-bold uppercase tracking-widest border border-amber-500/20">
+                        pending
+                      </span>
+                    )}
+                  </div>
+                  
+                  <p className="text-[0.9rem] text-gray-custom font-light leading-relaxed italic mb-6 flex-grow">
+                    "{r.content}"
+                  </p>
+
+                  <div className="mb-6">
+                    <div className="font-bold text-[0.9rem]">{r.name}</div>
+                    <div className="text-[0.7rem] text-gray-custom uppercase tracking-widest mt-1">{r.role}</div>
+                  </div>
+
+                  <div className="flex gap-3 pt-6 border-t border-border-custom">
+                    {!r.isApproved && (
+                      <button
+                        onClick={() => handleApproveReview(r.id)}
+                        className="flex-1 py-2 bg-white text-black text-[0.75rem] font-bold hover:bg-gray-200 transition-colors text-lowercase"
+                      >
+                        approve
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleDeleteReview(r.id)}
+                      className="flex-1 py-2 border border-border-custom text-gray-custom/40 text-[0.75rem] font-semibold hover:border-red-500 hover:text-red-500 transition-all text-lowercase"
+                    >
+                      delete
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="bg-black p-20 text-center col-span-full">
+                <div className="text-4xl opacity-20 mb-4">💬</div>
+                <h3 className="font-display font-bold text-white mb-2 text-lowercase">no reviews yet</h3>
+                <p className="text-gray-custom text-sm font-light">Users can submit reviews from the landing page</p>
               </div>
             )}
           </div>
