@@ -4,8 +4,24 @@ import { api } from '../api';
 import { Stats } from '../types';
 import { ArrowRight, Target, Users, Globe, ShieldCheck, Zap, Trophy } from 'lucide-react';
 import { ReviewSection } from '../components/ReviewSection';
+import { animate, useMotionValue, useTransform } from 'motion/react';
 
 import { User } from 'firebase/auth';
+
+const Counter = ({ value }: { value: number }) => {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+
+  useEffect(() => {
+    const controls = animate(count, value, { 
+      duration: 2,
+      ease: "easeOut"
+    });
+    return controls.stop;
+  }, [value]);
+
+  return <motion.span>{rounded}</motion.span>;
+};
 
 interface LandingProps {
   onNavigate: (page: string) => void;
@@ -17,8 +33,6 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
   const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0, teamRequests: 0 });
 
   useEffect(() => {
-    if (!user) return;
-    
     const fetchStats = async () => {
       try {
         const s = await api.getStats();
@@ -28,7 +42,7 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
       }
     };
     fetchStats();
-  }, [user]);
+  }, []);
 
   return (
     <div className="bg-black">
@@ -96,19 +110,19 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
           >
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
-                {stats.profiles}<span className="text-gray-custom">+</span>
+                <Counter value={stats.profiles} /><span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">profiles created</div>
             </div>
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
-                {stats.matches}<span className="text-gray-custom">+</span>
+                <Counter value={stats.matches} /><span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">matches made</div>
             </div>
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
-                {stats.connections}<span className="text-gray-custom">+</span>
+                <Counter value={stats.connections} /><span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">connected</div>
             </div>
