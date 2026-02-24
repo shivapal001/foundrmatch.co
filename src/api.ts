@@ -158,8 +158,16 @@ export const api = {
     return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as TeamRequest));
   },
 
-  async createTeamRequest(request: TeamRequest): Promise<void> {
-    await setDoc(doc(db, "teamRequests", request.id), request);
+  async createTeamRequest(request: Omit<TeamRequest, 'id'>): Promise<void> {
+    try {
+      await addDoc(collection(db, "teamRequests"), {
+        ...request,
+        createdAt: Date.now()
+      });
+    } catch (error) {
+      console.error("Error creating team request:", error);
+      throw error;
+    }
   },
 
   async deleteTeamRequest(id: string): Promise<void> {

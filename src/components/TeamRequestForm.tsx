@@ -25,20 +25,17 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting team request...', formData);
     setLoading(true);
 
     try {
-      const request: TeamRequest = {
-        id: Date.now().toString(),
-        ...formData,
-        createdAt: Date.now()
-      };
-
-      await api.createTeamRequest(request);
+      await api.createTeamRequest(formData);
+      console.log('Team request submitted successfully');
       setSubmitted(true);
       showToast('Team request submitted successfully!', 'success');
     } catch (err) {
-      showToast('Failed to submit request', 'error');
+      console.error('Submission error:', err);
+      showToast('Failed to submit request. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -79,11 +76,12 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-12">
+        <form id="team-request-form" onSubmit={handleSubmit} className="space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
-              <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Startup Name</label>
+              <label htmlFor="startupName" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Startup Name</label>
               <input
+                id="startupName"
                 required
                 type="text"
                 placeholder="e.g. Acme Inc"
@@ -93,8 +91,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Contact Name</label>
+              <label htmlFor="contactName" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Contact Name</label>
               <input
+                id="contactName"
                 required
                 type="text"
                 placeholder="Your Name"
@@ -107,8 +106,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
-              <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Work Email</label>
+              <label htmlFor="email" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Work Email</label>
               <input
+                id="email"
                 required
                 type="email"
                 placeholder="you@startup.com"
@@ -118,8 +118,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Phone Number</label>
+              <label htmlFor="phone" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Phone Number</label>
               <input
+                id="phone"
                 type="tel"
                 placeholder="+1 (555) 000-0000"
                 className="w-full bg-black border-b border-border-custom py-4 text-[1.1rem] font-light outline-none focus:border-white transition-colors"
@@ -130,8 +131,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
           </div>
 
           <div className="space-y-2">
-            <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Role Needed</label>
+            <label htmlFor="roleNeeded" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Role Needed</label>
             <select
+              id="roleNeeded"
               required
               className="w-full bg-black border-b border-border-custom py-4 text-[1.1rem] font-light outline-none focus:border-white transition-colors appearance-none"
               value={formData.roleNeeded}
@@ -151,8 +153,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
           </div>
 
           <div className="space-y-2">
-            <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Job Description & Requirements</label>
+            <label htmlFor="description" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Job Description & Requirements</label>
             <textarea
+              id="description"
               required
               placeholder="Tell us about the project, tech stack, and what you're looking for in a team member..."
               className="w-full bg-black border-b border-border-custom py-4 text-[1.1rem] font-light outline-none focus:border-white transition-colors min-h-[150px] resize-none"
@@ -163,8 +166,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
-              <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Budget (Monthly/Project)</label>
+              <label htmlFor="budget" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Budget (Monthly/Project)</label>
               <input
+                id="budget"
                 type="text"
                 placeholder="e.g. $2000 - $4000"
                 className="w-full bg-black border-b border-border-custom py-4 text-[1.1rem] font-light outline-none focus:border-white transition-colors"
@@ -173,8 +177,9 @@ export const TeamRequestForm: React.FC<TeamRequestFormProps> = ({ showToast, onN
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Equity Range (Optional)</label>
+              <label htmlFor="equity" className="text-[0.7rem] font-bold text-gray-custom tracking-widest uppercase">Equity Range (Optional)</label>
               <input
+                id="equity"
                 type="text"
                 placeholder="e.g. 1% - 5%"
                 className="w-full bg-black border-b border-border-custom py-4 text-[1.1rem] font-light outline-none focus:border-white transition-colors"
