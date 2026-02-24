@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../api';
-import { Profile, WaitlistEntry, Match, Stats } from '../types';
-import { Search, Filter, Plus, Trash2, Check, X, ExternalLink, MapPin, Mail, Phone, Linkedin, MessageSquare } from 'lucide-react';
+import { Profile, WaitlistEntry, Match, Stats, TeamRequest } from '../types';
+import { Search, Filter, Plus, Trash2, Check, X, ExternalLink, MapPin, Mail, Phone, Linkedin, MessageSquare, Briefcase } from 'lucide-react';
 
 interface AdminProps {
   onNavigate: (page: string) => void;
@@ -12,11 +12,12 @@ interface AdminProps {
 export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
-  const [activeTab, setActiveTab] = useState<'profiles' | 'matches' | 'waitlist'>('profiles');
-  const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0 });
+  const [activeTab, setActiveTab] = useState<'profiles' | 'matches' | 'waitlist' | 'teamRequests'>('profiles');
+  const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0, teamRequests: 0 });
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
+  const [teamRequests, setTeamRequests] = useState<TeamRequest[]>([]);
   
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -36,16 +37,30 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
   }, [isLoggedIn]);
 
   const fetchData = async () => {
-    const [s, p, m, w] = await Promise.all([
-      api.getStats(),
-      api.getProfiles(),
-      api.getMatches(),
-      api.getWaitlist()
-    ]);
-    setStats(s);
-    setProfiles(p);
-    setMatches(m);
-    setWaitlist(w);
+    try {
+      const [s, p, m, w, t] = await Promise.allSettled([
+        api.getStats(true),
+        api.getProfiles(),
+        api.getMatches(),
+        api.getWaitlist(),
+        api.getTeamRequests()
+      ]);
+      
+      if (s.status === 'fulfilled') setStats(s.value);
+      if (p.status === 'fulfilled') setProfiles(p.value);
+      if (m.status === 'fulfilled') setMatches(m.value);
+      if (w.status === 'fulfilled') setWaitlist(w.value);
+      if (t.status === 'fulfilled') setTeamRequests(t.value);
+
+      const rejected = [s, p, m, w, t].filter(r => r.status === 'rejected');
+      if (rejected.length > 0) {
+        console.error("Some data failed to load:", rejected);
+        showToast('Some data could not be loaded due to permissions', 'error');
+      }
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      showToast('Failed to load admin data', 'error');
+    }
   };
 
   const handleLogin = async () => {
@@ -79,6 +94,14 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
       await api.deleteMatch(id);
       fetchData();
       showToast('Match deleted', 'error');
+    }
+  };
+
+  const handleDeleteTeamRequest = async (id: string) => {
+    if (confirm('Delete this team request?')) {
+      await api.deleteTeamRequest(id);
+      fetchData();
+      showToast('Request deleted', 'error');
     }
   };
 
@@ -178,6 +201,7 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
             { label: 'Total Profiles', val: stats.profiles, icon: '👤' },
             { label: 'Total Matches', val: stats.matches, icon: '🤝' },
             { label: 'Connected', val: stats.connections, icon: '✅' },
+            { label: 'Team Requests', val: stats.teamRequests, icon: '💼' },
             { label: 'Waitlist', val: waitlist.length, icon: '📋' },
           ].map((s, i) => (
             <div key={i} className="bg-black p-8">
@@ -190,15 +214,15 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
 
         {/* Tabs */}
         <div className="flex border border-border-custom mb-10 w-full sm:w-fit overflow-x-auto no-scrollbar">
-          {(['profiles', 'matches', 'waitlist'] as const).map(tab => (
+          {(['profiles', 'matches', 'waitlist', 'teamRequests'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 text-[0.82rem] transition-colors text-lowercase border-r last:border-r-0 border-border-custom ${
+              className={`px-6 py-2.5 text-[0.82rem] transition-colors text-lowercase border-r last:border-r-0 border-border-custom whitespace-nowrap ${
                 activeTab === tab ? 'bg-white text-black font-bold' : 'text-gray-custom hover:text-white'
               }`}
             >
-              {tab}
+              {tab === 'teamRequests' ? 'team requests' : tab}
             </button>
           ))}
         </div>
@@ -467,6 +491,75 @@ export const Admin: React.FC<AdminProps> = ({ onNavigate, showToast }) => {
                 <div className="text-4xl opacity-20 mb-4">📋</div>
                 <h3 className="font-display font-bold text-white mb-2 text-lowercase">no waitlist entries yet</h3>
                 <p className="text-gray-custom text-sm font-light">Share your landing page to start collecting entries</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Team Requests Tab */}
+        {activeTab === 'teamRequests' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[1px] bg-border-custom border border-border-custom">
+            {teamRequests.length > 0 ? (
+              teamRequests.map((tr, index) => (
+                <motion.div 
+                  key={tr.id} 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-black p-8 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h3 className="font-display font-bold text-xl text-lowercase mb-1">{tr.startupName}</h3>
+                      <p className="text-[0.8rem] text-gray-custom font-light">Requested by {tr.contactName}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-white/10 border border-white/20 text-white text-[0.65rem] font-bold uppercase tracking-widest">
+                      {tr.roleNeeded}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-8">
+                    <p className="text-[0.9rem] text-gray-custom font-light leading-relaxed italic">
+                      "{tr.description}"
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="p-3 border border-border-custom">
+                      <p className="text-[0.6rem] font-bold text-gray-custom uppercase tracking-widest mb-1">Budget</p>
+                      <p className="text-[0.85rem] font-medium">{tr.budget || 'Not specified'}</p>
+                    </div>
+                    <div className="p-3 border border-border-custom">
+                      <p className="text-[0.6rem] font-bold text-gray-custom uppercase tracking-widest mb-1">Equity</p>
+                      <p className="text-[0.85rem] font-medium">{tr.equity || 'Not specified'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-border-custom">
+                    <div className="flex gap-4">
+                      <a href={`mailto:${tr.email}`} className="text-gray-custom hover:text-white transition-colors">
+                        <Mail className="w-4 h-4" />
+                      </a>
+                      {tr.phone && (
+                        <a href={`tel:${tr.phone}`} className="text-gray-custom hover:text-white transition-colors">
+                          <Phone className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteTeamRequest(tr.id)}
+                      className="px-3 py-1.5 border border-border-custom text-gray-custom/40 text-[0.75rem] font-semibold hover:border-red-500 hover:text-red-500 transition-all text-lowercase"
+                    >
+                      delete request
+                    </button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="bg-black p-20 text-center col-span-full">
+                <div className="text-4xl opacity-20 mb-4">💼</div>
+                <h3 className="font-display font-bold text-white mb-2 text-lowercase">no team requests yet</h3>
+                <p className="text-gray-custom text-sm font-light">Startups will submit requests here when they need team members</p>
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { Profile, WaitlistEntry, Match, Stats } from "./types";
+import { Profile, WaitlistEntry, Match, Stats, TeamRequest } from "./types";
 import { db } from "./lib/firebase";
 import { 
   collection, 
@@ -16,21 +16,38 @@ import {
 } from "firebase/firestore";
 
 export const api = {
-  async getStats(): Promise<Stats> {
+  async getStats(isAdmin: boolean = false): Promise<Stats> {
     const profilesColl = collection(db, "profiles");
     const matchesColl = collection(db, "matches");
+    const teamRequestsColl = collection(db, "teamRequests");
     const connectionsQuery = query(collection(db, "matches"), where("status", "==", "connected"));
 
-    const [profilesSnap, matchesSnap, connectionsSnap] = await Promise.all([
-      getCountFromServer(profilesColl),
-      getCountFromServer(matchesColl),
-      getCountFromServer(connectionsQuery)
+    const getCount = async (coll: any, isSensitive: boolean = false) => {
+      if (isSensitive && !isAdmin) return 0;
+      try {
+        const snap = await getCountFromServer(coll);
+        return snap.data().count;
+      } catch (e: any) {
+        // Only log if it's not a permission error or if we expected to have access
+        if (e.code !== 'permission-denied') {
+          console.error("Error fetching count:", e);
+        }
+        return 0;
+      }
+    };
+
+    const [profiles, matches, connections, teamRequests] = await Promise.all([
+      getCount(profilesColl),
+      getCount(matchesColl),
+      getCount(connectionsQuery),
+      getCount(teamRequestsColl, true)
     ]);
 
     return {
-      profiles: profilesSnap.data().count,
-      matches: matchesSnap.data().count,
-      connections: connectionsSnap.data().count
+      profiles,
+      matches,
+      connections,
+      teamRequests
     };
   },
 
@@ -133,5 +150,19 @@ export const api = {
     // Simple client-side check as requested before, or we could use a function.
     // Keeping it simple for now.
     return password === "shivapal";
+  },
+
+  async getTeamRequests(): Promise<TeamRequest[]> {
+    const q = query(collection(db, "teamRequests"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as TeamRequest));
+  },
+
+  async createTeamRequest(request: TeamRequest): Promise<void> {
+    await setDoc(doc(db, "teamRequests", request.id), request);
+  },
+
+  async deleteTeamRequest(id: string): Promise<void> {
+    await deleteDoc(doc(db, "teamRequests", id));
   }
 };

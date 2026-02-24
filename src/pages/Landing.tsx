@@ -4,16 +4,29 @@ import { api } from '../api';
 import { Stats } from '../types';
 import { ArrowRight, Target, Users, Globe, ShieldCheck, Zap, Trophy } from 'lucide-react';
 
+import { User } from 'firebase/auth';
+
 interface LandingProps {
   onNavigate: (page: string) => void;
+  user: User | null;
 }
 
-export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
-  const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0 });
+export const Landing: React.FC<LandingProps> = ({ onNavigate, user }) => {
+  const [stats, setStats] = useState<Stats>({ profiles: 0, matches: 0, connections: 0, teamRequests: 0 });
 
   useEffect(() => {
-    api.getStats().then(setStats);
-  }, []);
+    if (!user) return;
+    
+    const fetchStats = async () => {
+      try {
+        const s = await api.getStats();
+        setStats(s);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    };
+    fetchStats();
+  }, [user]);
 
   return (
     <div className="bg-black">
@@ -161,6 +174,46 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate }) => {
               <p className="text-[0.85rem] text-gray-custom leading-relaxed font-light">{f.desc}</p>
             </motion.div>
           ))}
+        </div>
+      </div>
+
+      {/* Hire Talent Section */}
+      <div className="border-t border-border-custom px-6 py-32">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <div className="text-[0.7rem] font-medium tracking-[3px] uppercase text-gray-custom mb-6">for startups</div>
+            <h2 className="font-display text-[clamp(2rem,4vw,3.5rem)] font-extrabold tracking-[-2px] leading-[0.95] mb-8 text-lowercase">
+              need to hire<br />core team members?
+            </h2>
+            <p className="text-gray-custom text-[1rem] font-light leading-relaxed mb-10 max-w-[500px]">
+              Beyond co-founders, we help early-stage startups find their first 10 employees. Whether you need a lead developer, a designer, or a growth hacker, we've got you covered.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate('hire')}
+              className="px-8 py-4 border border-border-custom text-white text-[0.9rem] font-bold hover:border-white transition-colors text-lowercase flex items-center gap-3"
+            >
+              get team member <ArrowRight className="w-4 h-4" />
+            </motion.button>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: 'Technical', roles: ['CTO', 'Lead Dev', 'Mobile'] },
+              { label: 'Creative', roles: ['UI/UX', 'Product', 'Brand'] },
+              { label: 'Growth', roles: ['Marketing', 'Sales', 'SEO'] },
+              { label: 'Ops', roles: ['COO', 'HR', 'Finance'] },
+            ].map((cat, i) => (
+              <div key={i} className="p-6 border border-border-custom bg-white/5">
+                <div className="text-[0.65rem] font-bold text-gray-custom uppercase tracking-widest mb-4">{cat.label}</div>
+                <div className="space-y-2">
+                  {cat.roles.map(r => (
+                    <div key={r} className="text-[0.85rem] font-light text-white/70">{r}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

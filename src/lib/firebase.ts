@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInAnonymously } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -30,4 +30,4 @@ export const initAnalytics = async () => {
   return null;
 };
 
-export { app, auth, db, googleProvider };
+export { app, auth, db, googleProvider, signInAnonymously };

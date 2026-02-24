@@ -10,8 +10,9 @@ import { ProfileForm } from './pages/ProfileForm';
 import { Admin } from './pages/Admin';
 import { Auth } from './pages/Auth';
 import { UserMatches } from './pages/UserMatches';
+import { TeamRequestForm } from './components/TeamRequestForm';
 import { Toast, ToastMessage } from './components/Toast';
-import { initAnalytics, auth } from './lib/firebase';
+import { initAnalytics, auth, signInAnonymously } from './lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { Menu, X as CloseIcon, LogOut, User as UserIcon, Briefcase, Home, ClipboardList, Shield } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -26,9 +27,21 @@ export default function App() {
   useEffect(() => {
     initAnalytics();
     
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setAuthLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        try {
+          await signInAnonymously(auth);
+          // The next onAuthStateChanged will handle setting the user and loading state
+          return;
+        } catch (err) {
+          console.error("Anonymous sign-in failed:", err);
+          setAuthLoading(false);
+        }
+      } else {
+        setUser(currentUser);
+        setAuthLoading(false);
+      }
+      
       if (currentUser && currentPage === 'auth') {
         setCurrentPage('landing');
       }
@@ -74,13 +87,15 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'landing':
-        return <Landing onNavigate={navigate} />;
+        return <Landing onNavigate={navigate} user={user} />;
       case 'waitlist':
         return <Waitlist onNavigate={navigate} showToast={showToast} />;
       case 'profile':
         return user ? <ProfileForm user={user} onNavigate={navigate} showToast={showToast} /> : <Auth showToast={showToast} />;
       case 'matches':
         return user ? <UserMatches user={user} onNavigate={navigate} showToast={showToast} /> : <Auth showToast={showToast} />;
+      case 'hire':
+        return <TeamRequestForm onNavigate={navigate} showToast={showToast} />;
       case 'admin':
         return <Admin onNavigate={navigate} showToast={showToast} />;
       case 'auth':
@@ -114,6 +129,12 @@ export default function App() {
             className="px-3 sm:px-4 py-2 text-[0.85rem] text-gray-custom hover:text-white transition-colors text-lowercase"
           >
             waitlist
+          </button>
+          <button 
+            onClick={() => navigate('hire')}
+            className="px-3 sm:px-4 py-2 text-[0.85rem] text-gray-custom hover:text-white transition-colors text-lowercase"
+          >
+            hire
           </button>
           <button 
             onClick={() => navigate(user ? 'profile' : 'auth')}
@@ -167,6 +188,9 @@ export default function App() {
           </button>
           <button onClick={() => navigate('waitlist')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
             <ClipboardList className="w-6 h-6 text-gray-custom" /> waitlist
+          </button>
+          <button onClick={() => navigate('hire')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <Briefcase className="w-6 h-6 text-gray-custom" /> hire talent
           </button>
           <button onClick={() => navigate(user ? 'profile' : 'auth')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
             <UserIcon className="w-6 h-6 text-gray-custom" /> profile

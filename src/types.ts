@@ -49,4 +49,18 @@ export interface Stats {
   profiles: number;
   matches: number;
   connections: number;
+  teamRequests: number;
+}
+
+export interface TeamRequest {
+  id: string;
+  startupName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  roleNeeded: string;
+  description: string;
+  budget?: string;
+  equity?: string;
+  createdAt: number;
 }
