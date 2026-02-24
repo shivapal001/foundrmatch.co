@@ -19,7 +19,7 @@ export const api = {
   async getStats(isAdmin: boolean = false): Promise<Stats> {
     const profilesColl = collection(db, "profiles");
     const matchesColl = collection(db, "matches");
-    const teamRequestsColl = collection(db, "teamRequests");
+    const teamRequestsQuery = query(collection(db, "waitlist"), where("type", "==", "team_request"));
     const connectionsQuery = query(collection(db, "matches"), where("status", "==", "connected"));
 
     const getCount = async (coll: any, isSensitive: boolean = false) => {
@@ -40,7 +40,7 @@ export const api = {
       getCount(profilesColl),
       getCount(matchesColl),
       getCount(connectionsQuery),
-      getCount(teamRequestsColl, true)
+      getCount(teamRequestsQuery, true)
     ]);
 
     return {
@@ -71,9 +71,24 @@ export const api = {
   },
 
   async getWaitlist(): Promise<WaitlistEntry[]> {
-    const q = query(collection(db, "waitlist"), orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
-    return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as WaitlistEntry));
+    const q = query(
+      collection(db, "waitlist"), 
+      where("type", "!=", "team_request"),
+      orderBy("type"), // Required for inequality filter
+      orderBy("createdAt", "desc")
+    );
+    // Note: If the above query fails because of missing index, we'll fall back to client-side filtering
+    try {
+      const snap = await getDocs(q);
+      return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as WaitlistEntry));
+    } catch (e) {
+      console.warn("Waitlist query failed, falling back to client-side filtering", e);
+      const q2 = query(collection(db, "waitlist"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q2);
+      return snap.docs
+        .map(doc => ({ ...doc.data(), id: doc.id } as any))
+        .filter(doc => doc.type !== 'team_request');
+    }
   },
 
   async joinWaitlist(entry: WaitlistEntry): Promise<void> {
@@ -153,15 +168,22 @@ export const api = {
   },
 
   async getTeamRequests(): Promise<TeamRequest[]> {
-    const q = query(collection(db, "teamRequests"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "waitlist"), 
+      where("type", "==", "team_request"),
+      orderBy("createdAt", "desc")
+    );
     const snap = await getDocs(q);
     return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as TeamRequest));
   },
 
   async createTeamRequest(request: Omit<TeamRequest, 'id'>): Promise<void> {
     try {
-      await addDoc(collection(db, "teamRequests"), {
+      const id = 'tr_' + Date.now().toString() + Math.random().toString(36).substring(2, 5);
+      await setDoc(doc(db, "waitlist", id), {
         ...request,
+        id,
+        type: 'team_request',
         createdAt: Date.now()
       });
     } catch (error) {
@@ -171,6 +193,6 @@ export const api = {
   },
 
   async deleteTeamRequest(id: string): Promise<void> {
-    await deleteDoc(doc(db, "teamRequests", id));
+    await deleteDoc(doc(db, "waitlist", id));
   }
 };
