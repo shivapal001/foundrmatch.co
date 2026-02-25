@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { api } from '../api';
 import { Match } from '../types';
 import { User } from 'firebase/auth';
-import { Mail, MessageSquare, ExternalLink, User as UserIcon, ShieldCheck, Phone, MessageCircle } from 'lucide-react';
+import { Mail, MessageSquare, ExternalLink, User as UserIcon, ShieldCheck, Phone, MessageCircle, Zap } from 'lucide-react';
 
 interface UserMatchesProps {
   user: User;
@@ -47,6 +47,38 @@ export const UserMatches: React.FC<UserMatchesProps> = ({ user, onNavigate, show
             These are the co-founders our team has hand-picked for you based on your profile and vision.
           </p>
         </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12 p-8 bg-white/5 border border-white/20 relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="relative z-10 flex items-center gap-6">
+            <div className="w-12 h-12 bg-white text-black flex items-center justify-center shrink-0">
+              <Zap className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-1">Guaranteed Matching</h3>
+              <p className="text-gray-custom text-[0.9rem] font-light">
+                Our algorithm and curation team work around the clock. <br/>
+                <span className="text-white font-medium">You get a new, hand-picked match every 24 hours.</span>
+              </p>
+            </div>
+          </div>
+          <motion.div 
+            animate={{ 
+              x: ['-100%', '200%'],
+            }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity, 
+              ease: "linear",
+              repeatDelay: 2
+            }}
+            className="absolute bottom-0 left-0 h-[2px] w-1/2 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
+          />
+        </motion.div>
 
         {matches.length === 0 ? (
           <motion.div 

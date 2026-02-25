@@ -119,6 +119,7 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
                 <Counter value={stats.matches} /><span className="text-gray-custom">+</span>
               </div>
               <div className="text-[0.7rem] sm:text-[0.75rem] text-gray-custom mt-2 text-lowercase">matches made</div>
+              <div className="text-[0.6rem] text-white/30 mt-1 uppercase tracking-widest font-bold">match every 24h</div>
             </div>
             <div className="flex-1 min-w-[100px]">
               <div className="font-display text-3xl sm:text-4xl font-extrabold tracking-tighter leading-none">
@@ -145,6 +146,10 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
               <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
               <span className="text-[0.8rem] text-gray-200">human-reviewed profiles · zero spam</span>
             </div>
+            <div className="flex items-center gap-3 border border-white/15 px-4 py-2 mb-3 backdrop-blur-md bg-black/40 w-fit">
+              <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              <span className="text-[0.8rem] text-gray-200">get a match in every 24 hours</span>
+            </div>
             <div className="mt-2 font-display text-[0.65rem] text-gray-custom/50 tracking-[2px] uppercase">
               the right co-founder changes everything
             </div>
@@ -167,7 +172,7 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
             { id: '01', icon: <Target className="w-6 h-6" />, title: 'skills compatibility', desc: 'We match founders based on complementary skills — technical + business, design + product. No guessing.' },
             { id: '02', icon: <Users className="w-6 h-6" />, title: 'commitment alignment', desc: 'Full-time or part-time — we only match people with the same commitment level. No wasted conversations.' },
             { id: '03', icon: <Globe className="w-6 h-6" />, title: 'india-first network', desc: "Built for Indian founders first. Bharat's startup ecosystem is massive — we're here for it." },
-            { id: '04', icon: <ShieldCheck className="w-6 h-6" />, title: 'curated matching', desc: 'Human-reviewed profiles with intentional introductions. Quality over quantity, every time.' },
+            { id: '04', icon: <ShieldCheck className="w-6 h-6" />, title: 'curated matching', desc: 'Human-reviewed profiles with intentional introductions. Get a match in every 24 hours.' },
             { id: '05', icon: <Zap className="w-6 h-6" />, title: 'structured profiles', desc: "Rich, structured profiles that surface what matters — stage, industry, vision, and what you're looking for." },
             { id: '06', icon: <Trophy className="w-6 h-6" />, title: 'zero noise', desc: 'No cold DMs, no spam. Admin-facilitated introductions only. Your time is valuable.' },
           ].map((f, i) => (
