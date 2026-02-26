@@ -10,11 +10,12 @@ import { ProfileForm } from './pages/ProfileForm';
 import { Admin } from './pages/Admin';
 import { Auth } from './pages/Auth';
 import { UserMatches } from './pages/UserMatches';
+import { Contact } from './pages/Contact';
 import { TeamRequestForm } from './components/TeamRequestForm';
 import { Toast, ToastMessage } from './components/Toast';
 import { initAnalytics, auth, signInAnonymously } from './lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { Menu, X as CloseIcon, LogOut, User as UserIcon, Briefcase, Home, ClipboardList, Shield } from 'lucide-react';
+import { Menu, X as CloseIcon, LogOut, User as UserIcon, Briefcase, Home, ClipboardList, Shield, MessageSquare } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
 export default function App() {
@@ -98,6 +99,8 @@ export default function App() {
         return <TeamRequestForm onNavigate={navigate} showToast={showToast} />;
       case 'admin':
         return <Admin onNavigate={navigate} showToast={showToast} />;
+      case 'contact':
+        return <Contact onNavigate={navigate} showToast={showToast} />;
       case 'auth':
         return <Auth showToast={showToast} />;
       default:
@@ -149,6 +152,12 @@ export default function App() {
             matches
           </button>
           <button 
+            onClick={() => navigate('contact')}
+            className="px-3 sm:px-4 py-2 text-[0.85rem] text-gray-custom hover:text-white transition-colors text-lowercase"
+          >
+            contact
+          </button>
+          <button 
             onClick={() => navigate('admin')}
             className="ml-2 px-4 py-2 border border-border-custom text-white text-[0.85rem] font-semibold hover:border-white transition-colors text-lowercase"
           >
@@ -197,6 +206,9 @@ export default function App() {
           </button>
           <button onClick={() => navigate(user ? 'matches' : 'auth')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
             <Briefcase className="w-6 h-6 text-gray-custom" /> matches
+          </button>
+          <button onClick={() => navigate('contact')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
+            <MessageSquare className="w-6 h-6 text-gray-custom" /> contact us
           </button>
           <button onClick={() => navigate('admin')} className="flex items-center gap-4 text-2xl font-display font-bold text-lowercase">
             <Shield className="w-6 h-6 text-gray-custom" /> admin panel

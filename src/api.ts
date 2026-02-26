@@ -1,4 +1,4 @@
-import { Profile, WaitlistEntry, Match, Stats, TeamRequest, Review } from "./types";
+import { Profile, WaitlistEntry, Match, Stats, TeamRequest, Review, ContactMessage } from "./types";
 import { db } from "./lib/firebase";
 import { 
   collection, 
@@ -247,6 +247,44 @@ export const api = {
   },
 
   async deleteTeamRequest(id: string): Promise<void> {
+    await deleteDoc(doc(db, "waitlist", id));
+  },
+
+  async getContactMessages(): Promise<ContactMessage[]> {
+    try {
+      const q = query(
+        collection(db, "waitlist"), 
+        where("type", "==", "contact"),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map(doc => ({ ...doc.data(), id: doc.id } as ContactMessage));
+    } catch (e) {
+      console.warn("Contact messages query failed, falling back to client-side filtering", e);
+      const q2 = query(collection(db, "waitlist"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q2);
+      return snap.docs
+        .map(doc => ({ ...doc.data(), id: doc.id } as any))
+        .filter(doc => doc.type === 'contact') as ContactMessage[];
+    }
+  },
+
+  async createContactMessage(message: Omit<ContactMessage, 'id' | 'createdAt'>): Promise<void> {
+    try {
+      const newDocRef = doc(collection(db, "waitlist"));
+      await setDoc(newDocRef, {
+        ...message,
+        id: newDocRef.id,
+        type: 'contact',
+        createdAt: Date.now()
+      });
+    } catch (error) {
+      console.error("Error creating contact message:", error);
+      throw error;
+    }
+  },
+
+  async deleteContactMessage(id: string): Promise<void> {
     await deleteDoc(doc(db, "waitlist", id));
   }
 };

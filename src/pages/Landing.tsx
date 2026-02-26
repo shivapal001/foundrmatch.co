@@ -267,6 +267,7 @@ export const Landing: React.FC<LandingProps> = ({ onNavigate, user, showToast })
         <div className="flex gap-6">
           <button onClick={() => onNavigate('waitlist')} className="hover:text-white transition-colors">join waitlist</button>
           <button onClick={() => onNavigate('profile')} className="hover:text-white transition-colors">create profile</button>
+          <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors">contact us</button>
         </div>
       </footer>
     </div>

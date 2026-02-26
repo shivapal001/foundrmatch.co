@@ -74,3 +74,11 @@ export interface Review {
   createdAt: number;
   isApproved: boolean;
 }
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  number: string;
+  query: string;
+  createdAt: number;
+}
